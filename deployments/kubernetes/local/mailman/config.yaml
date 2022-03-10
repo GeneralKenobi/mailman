@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mailman-config
+  labels:
+    app: mailman
+data:
+  config.json: |-
+    {
+      "httpServer": {
+        "port": 8080
+      },
+      "postgres": {
+        "url": "postgres:5432",
+        "database": "mailmandb"
+      }
+    }
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: mailman-secret
+  labels:
+    app: mailman
+stringData:
+  config.json: |-
+    {
+      "postgres": {
+        "user": "admin",
+        "password": "admin"
+      }
+    }

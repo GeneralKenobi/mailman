@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: mailmandb
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: postgres-credentials
+  labels:
+    app: postgres
+stringData:
+  user: admin
+  password: admin

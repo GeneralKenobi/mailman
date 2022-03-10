@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailman
+  labels:
+    app: mailman
+spec:
+  selector:
+    app: mailman
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP

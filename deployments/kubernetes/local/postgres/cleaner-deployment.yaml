@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-cleaner
+spec:
+  template:
+    spec:
+      containers:
+        - name: postgres-cleaner
+          image: busybox:1.35
+          imagePullPolicy: IfNotPresent
+          command: [ 'sh', '-c', "ls -al /postgres-data && rm -rf /postgres-data/*" ]
+          volumeMounts:
+            - mountPath: /postgres-data
+              name: postgres-volume
+      restartPolicy: Never
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-volume-claim
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
