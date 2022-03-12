@@ -11,3 +11,18 @@ spec:
       targetPort: db
   selector:
     app: postgres
+---
+# This service is used for local development to get access to the DB from the host machine
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-minikube-tunnel
+  labels:
+    app: postgres
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5432
+      targetPort: db
+  selector:
+    app: postgres

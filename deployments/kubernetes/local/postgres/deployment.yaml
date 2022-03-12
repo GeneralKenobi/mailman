@@ -37,13 +37,21 @@ spec:
             - configMapRef:
                 name: postgres-config
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgres-volume
+            - name: postgres-volume
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts-volume
+              mountPath: /docker-entrypoint-initdb.d
       initContainers:
-        - name: init-scripts-provider
+        - name: init-scripts
           image: postgres-dbinit:dev
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: init-scripts-volume
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: postgres-volume
           persistentVolumeClaim:
             claimName: postgres-volume-claim
+        - name: init-scripts-volume
+          emptyDir:
+            sizeLimit: 1Gi
