@@ -8,6 +8,7 @@ create table customer
 
     constraint unique_email unique (email)
 );
+create index customer_email on customer (email);
 
 create table mailing_entry
 (
@@ -20,3 +21,4 @@ create table mailing_entry
     primary key (customer_id, mailing_id),
     constraint fk_customer foreign key (customer_id) references customer (id)
 );
+create index mailing_entry_insert_time on mailing_entry (insert_time);
