@@ -7,7 +7,7 @@ RUN go mod download
 COPY pkg pkg
 COPY internal internal
 COPY cmd cmd
-RUN CGO_ENABLED=0 GOOS=linux go build -o mailman cmd/mailman/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o mailman ./cmd/mailman
 
 
 FROM alpine:3.15
