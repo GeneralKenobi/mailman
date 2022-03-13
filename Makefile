@@ -17,7 +17,7 @@ BUILD_VERSION ?= dev
 #
 
 build-mailman:
-	@docker build -t mailman:$(BUILD_VERSION)
+	@docker build -t mailman:$(BUILD_VERSION) .
 
 build-postgres-dbinit:
 	@docker build -t postgres-dbinit:$(BUILD_VERSION) db
