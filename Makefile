@@ -1,5 +1,5 @@
 .PHONY: build-mailman build-postgres-dbinit \
-minikube-start minikube-stop minikube-clean minikube-tunnel \
+minikube minikube-clean minikube-start minikube-stop minikube-tunnel \
 postgres postgres-clean postgres-reset \
 minikube-build-postgres-dbinit \
 postgres-config postgres-storage postgres-deployment postgres-service \
@@ -27,14 +27,15 @@ build-postgres-dbinit:
 # Minikube commands
 #
 
+minikube: minikube-start postgres mailman
+
+minikube-clean: mailman-clean postgres-clean minikube-stop
+
 minikube-start:
 	@minikube start
 
 minikube-stop:
 	@minikube stop
-
-# Remove every mailman-related resource from the cluster
-minikube-clean: mailman-clean postgres-clean
 
 # Start minikube tunnel, which allows for connecting to the mailman service on localhost from the host machine
 minikube-tunnel:
