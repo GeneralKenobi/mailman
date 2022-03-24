@@ -1,24 +1,24 @@
 CREATE SCHEMA mailmandb;
 SET search_path TO mailmandb;
 
-create table customer
+CREATE TABLE customer
 (
-    id    serial primary key,
-    email varchar(255) not null check (email <> ''),
+    id    SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL CHECK (email <> ''),
 
-    constraint unique_email unique (email)
+    CONSTRAINT unique_email UNIQUE (email)
 );
-create index customer_email on customer (email);
+CREATE INDEX customer_email ON customer (email);
 
-create table mailing_entry
+CREATE TABLE mailing_entry
 (
-    customer_id int          not null,
-    mailing_id  int          not null,
-    title       varchar(255) not null check (title <> ''),
-    content     text,
-    insert_time timestamp    not null,
+    id          SERIAL PRIMARY KEY,
+    customer_id INT          NOT NULL,
+    mailing_id  INT          NOT NULL,
+    title       VARCHAR(255) NOT NULL CHECK (title <> ''),
+    content     TEXT,
+    insert_time TIMESTAMP    NOT NULL,
 
-    primary key (customer_id, mailing_id),
-    constraint fk_customer foreign key (customer_id) references customer (id)
+    CONSTRAINT fk_customer FOREIGN KEY (customer_id) REFERENCES customer (id)
 );
-create index mailing_entry_insert_time on mailing_entry (insert_time);
+CREATE INDEX mailing_entry_insert_time ON mailing_entry (insert_time);
