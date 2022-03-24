@@ -65,7 +65,8 @@ func TestLoad(t *testing.T) {
 			defaultConfig = mockDefaultConfig
 			fileReadHook = test.mockFileReadFunc
 
-			result, err := Load(test.inputConfigFilePaths)
+			err := Load(test.inputConfigFilePaths)
+			result := Get()
 
 			// TODO: Extract error comparison to helper func
 			// TODO: Extract pretty print to helper func
