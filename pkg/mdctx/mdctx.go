@@ -55,6 +55,14 @@ func CorrelationId(ctx context.Context) string {
 	return ""
 }
 
+// OperationId extracts operation ID from context. Empty string is returned if it's not set.
+func OperationId(ctx context.Context) string {
+	if value, ok := ctx.Value(operationIdKey).(mdcValue); ok {
+		return string(value)
+	}
+	return ""
+}
+
 // Debugf logs at debug level. Arguments are handled in the manner of fmt.Printf.
 func Debugf(ctx context.Context, format string, args ...interface{}) {
 	logf(logLevelDebug, ctx, format, args...)
