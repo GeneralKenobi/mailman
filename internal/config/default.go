@@ -6,6 +6,7 @@ var defaultConfig = Config{
 		ShutdownTimeoutSeconds: 30,
 	},
 	Postgres: Postgres{
-		Port: 5432,
+		Port:                  5432,
+		DefaultTimeoutSeconds: 30,
 	},
 }
