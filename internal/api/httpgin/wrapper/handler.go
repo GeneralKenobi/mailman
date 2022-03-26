@@ -20,12 +20,18 @@ type SimpleHandler interface {
 // Default on error writes error response from the error returned from the handler.
 //
 // To run the handler Do has to be called.
-func ForRequest(request *gin.Context, handler func(ctx context.Context) error) SimpleHandler {
+func ForRequest(requestCtx *gin.Context, handler func(ctx context.Context) error) SimpleHandler {
+	ctx := request.Context(requestCtx)
 	return &simpleHandler{
-		handlerReturningNil: ForRequestReturningV(request, func(ctx context.Context) (any, error) {
-			err := handler(ctx)
-			return nil, err
-		}),
+		handler: func() error {
+			return handler(ctx)
+		},
+		onSuccess: func() {
+			requestCtx.Status(http.StatusOK)
+		},
+		onError: func(err error) {
+			request.WriteErrorResponse(ctx, requestCtx, err)
+		},
 	}
 }
 
@@ -85,23 +91,28 @@ func (handler *simpleHandlerReturningV[V]) Do() {
 }
 
 type simpleHandler struct {
-	handlerReturningNil SimpleHandlerReturningV[any]
+	handler   func() error
+	onSuccess func()
+	onError   func(error)
 }
 
 var _ SimpleHandler = (*simpleHandler)(nil) // Interface guard
 
 func (handler *simpleHandler) OnSuccess(onSuccess func()) SimpleHandler {
-	handler.handlerReturningNil.OnSuccess(func(any) {
-		onSuccess()
-	})
+	handler.onSuccess = onSuccess
 	return handler
 }
 
 func (handler *simpleHandler) OnError(onError func(error)) SimpleHandler {
-	handler.handlerReturningNil.OnError(onError)
+	handler.onError = onError
 	return handler
 }
 
 func (handler *simpleHandler) Do() {
-	handler.handlerReturningNil.Do()
+	err := handler.handler()
+	if err == nil {
+		handler.onSuccess()
+	} else {
+		handler.onError(err)
+	}
 }
