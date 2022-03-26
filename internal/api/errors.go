@@ -15,10 +15,10 @@ type StatusError interface {
 type Status string
 
 const (
-	StatusBadRequest    Status = "Bad request"
-	StatusNotFound      Status = "Not found"
-	StatusUnauthorized  Status = "Unauthorized"
-	StatusInternalError Status = "Internal error"
+	StatusBadRequest    Status = "bad request"
+	StatusNotFound      Status = "not found"
+	StatusUnauthorized  Status = "unauthorized"
+	StatusInternalError Status = "internal error"
 )
 
 var _ StatusError = (*statusError)(nil) // Interface guard

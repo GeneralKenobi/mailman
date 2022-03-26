@@ -50,7 +50,7 @@ func (remover *StaleEntryRemover) removeStaleEntries(ctx context.Context, staleE
 		mdctx.Infof(ctx, "Removing stale mailing entry %d", entry.Id)
 		err := remover.repository.DeleteMailingEntryById(ctx, entry.Id)
 		if err != nil {
-			return fmt.Errorf("error removing stale entry %d: %w", entry.Id, err)
+			return fmt.Errorf("error removing stale mailing entry %d: %w", entry.Id, err)
 		}
 	}
 
