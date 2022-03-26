@@ -11,6 +11,18 @@ import (
 	"time"
 )
 
+// SetLogLevelFromString parses and sets log level from the given string value.
+func SetLogLevelFromString(value string) error {
+	convertedLogLevel, ok := logLevelFromString(value)
+	if !ok {
+		return fmt.Errorf("unknown log level: %s", value)
+	}
+
+	infoInternalF(nil, "Changing log level from %v to %v", configuredLogLevel, convertedLogLevel)
+	configuredLogLevel = convertedLogLevel
+	return nil
+}
+
 // New returns a context with a random operation ID. The context should be used throughout single request processing to correlate all logs
 // and actions using its operation ID.
 func New() context.Context {
@@ -94,12 +106,21 @@ func Fatalf(ctx context.Context, format string, args ...interface{}) {
 	os.Exit(1)
 }
 
+// infoInternalF logs at always-enabled internal info level. Arguments are handled in the manner of fmt.Printf.
+func infoInternalF(ctx context.Context, format string, args ...interface{}) {
+	logf(logLevelInfoInternal, ctx, format, args...)
+}
+
 func logf(logLevel logLevel, ctx context.Context, format string, args ...interface{}) {
+	if logLevel < configuredLogLevel {
+		return
+	}
+
 	if ctx == nil {
 		ctx = context.TODO()
 	}
 
-	decoratedFormat := fmt.Sprintf("%s %s %s]   %s   ]%s", timestamp(), logLevel, loggingFileAndLine(), format, mdcLabels(ctx))
+	decoratedFormat := fmt.Sprintf("%s %v %s]   %s   ]%s", timestamp(), logLevel, loggingFileAndLine(), format, mdcLabels(ctx))
 	logger.Printf(decoratedFormat, args...)
 }
 
@@ -137,7 +158,7 @@ func mdcLabels(ctx context.Context) string {
 }
 
 type (
-	logLevel string
+	logLevel int
 	mdcKey   string
 	mdcValue string
 )
@@ -150,13 +171,52 @@ const (
 	requestMethodKey  mdcKey = "http"
 	requestUriKey     mdcKey = "uri"
 	clientIpKey       mdcKey = "client-ip"
-	// All log levels should have the same length
-	logLevelDebug logLevel = "DEBUG"
-	logLevelInfo  logLevel = "INFO "
-	logLevelWarn  logLevel = "WARN "
-	logLevelError logLevel = "ERROR"
-	logLevelFatal logLevel = "FATAL"
+
+	logLevelDebug logLevel = iota
+	logLevelInfo
+	logLevelWarn
+	logLevelError
+	logLevelFatal
+	logLevelInfoInternal // For internal log messages only, e.g. new log level.
 )
+
+func (logLevel logLevel) String() string {
+	// All log levels should have the same length
+	switch logLevel {
+	case logLevelDebug:
+		return "DEBUG"
+	case logLevelInfo:
+		return "INFO "
+	case logLevelWarn:
+		return "WARN "
+	case logLevelError:
+		return "ERROR"
+	case logLevelFatal:
+		return "FATAL"
+	case logLevelInfoInternal:
+		return "INFO "
+	default:
+		return "???  "
+	}
+}
+
+func logLevelFromString(value string) (converted logLevel, ok bool) {
+	// All log levels should have the same length.
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "DEBUG":
+		return logLevelDebug, true
+	case "INFO":
+		return logLevelInfo, true
+	case "WARN":
+		return logLevelWarn, true
+	case "ERROR":
+		return logLevelError, true
+	case "FATAL":
+		return logLevelFatal, true
+	default:
+		return logLevelDebug, false
+	}
+}
 
 var (
 	// mdcKeys contains all defined mdc keys and defines the order in which they appear in log messages.
@@ -168,5 +228,6 @@ var (
 		requestUriKey,
 		clientIpKey,
 	}
-	logger = log.New(os.Stderr, "", 0)
+	logger             = log.New(os.Stderr, "", 0)
+	configuredLogLevel = logLevelInfo
 )

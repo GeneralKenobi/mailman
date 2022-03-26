@@ -14,16 +14,25 @@ import (
 )
 
 func main() {
+	configure()
+	// TODO: Shutdown time configuration
+	parentCtx := shutdown.NewParentContext(30 * time.Second)
+	bootstrap(parentCtx)
+	shutdownAfterStopSignal(parentCtx)
+}
+
+func configure() {
 	argsCfg := commandLineArgsConfig()
+
 	err := config.Load(argsCfg.configFiles)
 	if err != nil {
 		mdctx.Fatalf(nil, "Error loading configuration: %v", err)
 	}
 
-	// TODO: Shutdown time configuration
-	parentCtx := shutdown.NewParentContext(30 * time.Second)
-	bootstrap(parentCtx)
-	shutdownAfterStopSignal(parentCtx)
+	err = mdctx.SetLogLevelFromString(argsCfg.logLevel)
+	if err != nil {
+		mdctx.Fatalf(nil, "Error setting log level: %v", err)
+	}
 }
 
 func bootstrap(parentCtx shutdown.ParentContext) {

@@ -25,6 +25,7 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - -config-file=/etc/mailman/config/config.json,/etc/mailman/secret-config/config.json
+            - -log-level=DEBUG
           ports:
             - name: http
               containerPort: 8080
