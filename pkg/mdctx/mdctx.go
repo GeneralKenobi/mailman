@@ -18,6 +18,11 @@ func New() context.Context {
 	return withValue(ctx, operationIdKey, util.RandomAlphanumericString(operationIdLength))
 }
 
+// WithOperationName returns a copy of context with added operation name (e.g. "create mailing entry").
+func WithOperationName(ctx context.Context, operationName string) context.Context {
+	return withValue(ctx, operationNameKey, operationName)
+}
+
 // WithCorrelationId returns a copy of context with added correlation ID. Unlike operation ID, correlation ID should come from clients'
 // requests and may be associated with multiple requests.
 func WithCorrelationId(ctx context.Context, correlationId string) context.Context {
@@ -139,6 +144,7 @@ type (
 
 const (
 	operationIdLength        = 10
+	operationNameKey  mdcKey = "operation-name"
 	operationIdKey    mdcKey = "operation-id"
 	correlationIdKey  mdcKey = "correlation-id"
 	requestMethodKey  mdcKey = "http"
@@ -155,6 +161,7 @@ const (
 var (
 	// mdcKeys contains all defined mdc keys and defines the order in which they appear in log messages.
 	mdcKeys = []mdcKey{
+		operationNameKey,
 		operationIdKey,
 		correlationIdKey,
 		requestMethodKey,
