@@ -54,16 +54,16 @@ func TestLoad(t *testing.T) {
 	}
 
 	originalDefaultConfiguration := defaultConfig
-	originalFileReadHook := fileReadHook
+	originalFileReadHook := readFile
 	defer func() {
 		defaultConfig = originalDefaultConfiguration
-		fileReadHook = originalFileReadHook
+		readFile = originalFileReadHook
 	}()
 
 	for title, test := range tests {
 		t.Run(title, func(t *testing.T) {
 			defaultConfig = mockDefaultConfig
-			fileReadHook = test.mockFileReadFunc
+			readFile = test.mockFileReadFunc
 
 			err := Load(test.inputConfigFilePaths)
 			result := Get()

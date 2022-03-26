@@ -10,15 +10,15 @@ import (
 
 func TestLogging(t *testing.T) {
 	originalOutput := logger.Writer()
-	originalCurrentTimeHook := currentTimeHook
+	originalCurrentTimeHook := currentTime
 	defer func() {
 		logger.SetOutput(originalOutput)
-		currentTimeHook = originalCurrentTimeHook
+		currentTime = originalCurrentTimeHook
 	}()
 
 	var logOutput bytes.Buffer
 	logger.SetOutput(&logOutput)
-	currentTimeHook = func() time.Time {
+	currentTime = func() time.Time {
 		return time.Date(2022, 3, 13, 20, 59, 48, 162428129, time.UTC)
 	}
 

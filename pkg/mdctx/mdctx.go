@@ -99,11 +99,11 @@ func logf(logLevel logLevel, ctx context.Context, format string, args ...interfa
 }
 
 func timestamp() string {
-	return currentTimeHook().UTC().Format("2006-01-02T15:04:05.000Z")
+	return currentTime().UTC().Format("2006-01-02T15:04:05.000Z")
 }
 
-// For mocking in unit tests.
-var currentTimeHook = time.Now
+// Hook for mocking in unit tests.
+var currentTime = time.Now
 
 func loggingFileAndLine() string {
 	_, filepath, lineNumber, ok := runtime.Caller(3)

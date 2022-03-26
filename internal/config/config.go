@@ -20,7 +20,7 @@ func Load(configFiles []string) error {
 	cfg := defaultConfig
 
 	for _, configFile := range configFiles {
-		configBytes, err := fileReadHook(configFile)
+		configBytes, err := readFile(configFile)
 		if err != nil {
 			return fmt.Errorf("error reading configuration file %q: %w", configFile, err)
 		}
@@ -45,5 +45,5 @@ func Get() Config {
 
 var currentConfig = defaultConfig
 
-// For mocking in unit tests.
-var fileReadHook = ioutil.ReadFile
+// Hook for mocking in unit tests.
+var readFile = ioutil.ReadFile
