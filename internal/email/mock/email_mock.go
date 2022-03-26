@@ -6,15 +6,15 @@ import (
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 )
 
-type EmailService struct{}
+type Emailer struct{}
 
-var _ email.EmailService = (*EmailService)(nil)
+var _ email.Service = (*Emailer)(nil)
 
-func New() *EmailService {
-	return &EmailService{}
+func NewEmailer() *Emailer {
+	return &Emailer{}
 }
 
-func (m *EmailService) Send(ctx context.Context, emailAddress, title, content string) error {
+func (emailer *Emailer) Send(ctx context.Context, emailAddress, title, content string) error {
 	mdctx.Infof(ctx, "Mock email service: Sending email titled %q to %q with content %q", title, emailAddress, content)
 	return nil
 }

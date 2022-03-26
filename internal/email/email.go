@@ -2,6 +2,6 @@ package email
 
 import "context"
 
-type EmailService interface {
+type Service interface {
 	Send(ctx context.Context, emailAddress, title, content string) error
 }
