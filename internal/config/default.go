@@ -9,4 +9,7 @@ var defaultConfig = Config{
 		Port:                  5432,
 		DefaultTimeoutSeconds: 30,
 	},
+	StaleMailingEntryRemover: StaleMailingEntryRemover{
+		StalenessThresholdSeconds: 2 * 60 * 60,
+	},
 }

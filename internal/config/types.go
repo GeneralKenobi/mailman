@@ -2,8 +2,9 @@ package config
 
 // Config aggregates configuration for modules.
 type Config struct {
-	HttpServer HttpServer `json:"httpServer"`
-	Postgres   Postgres   `json:"postgres"`
+	HttpServer               HttpServer               `json:"httpServer"`
+	Postgres                 Postgres                 `json:"postgres"`
+	StaleMailingEntryRemover StaleMailingEntryRemover `json:"staleMailingEntryRemover"`
 }
 
 // HttpServer stores configuration for the HTTP server.
@@ -20,4 +21,8 @@ type Postgres struct {
 	Password              string `json:"password"`              // Password authenticating User
 	Database              string `json:"database"`              // Database to use
 	DefaultTimeoutSeconds int    `json:"defaultTimeoutSeconds"` // Default timeout to use for DB operations if none is specified
+}
+
+type StaleMailingEntryRemover struct {
+	StalenessThresholdSeconds int `json:"stalenessThresholdSeconds"`
 }
