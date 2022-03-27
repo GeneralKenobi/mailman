@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/health"
+	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry/remover"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry/sender"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/request"
 	"github.com/GeneralKenobi/mailman/internal/config"
@@ -53,6 +54,7 @@ func (server *Server) setupGinEngine() *gin.Engine {
 
 	ginEngine.GET("/health", health.HandlerFunc)
 	ginEngine.POST("/api/messages/send", sender.NewHandler(server.persistenceCtx, server.emailer).HandlerFunc)
+	ginEngine.DELETE("/api/messages/:id", remover.NewHandler(server.persistenceCtx).HandlerFunc)
 
 	return ginEngine
 }
