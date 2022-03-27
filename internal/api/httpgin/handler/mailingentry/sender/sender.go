@@ -25,7 +25,7 @@ type Handler struct {
 }
 
 func (handler *Handler) HandlerFunc(request *gin.Context) {
-	wrapper.ForRequest(request, func(ctx context.Context) error {
+	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
 		ctx = mdctx.WithOperationName(ctx, "send mailing entries with mailing ID")
 
 		return wrapper.WithBoundRequestBody(request, func(mailingRequest model.MailingRequestDto) error {
@@ -51,5 +51,5 @@ func (handler *Handler) HandlerFunc(request *gin.Context) {
 
 			return nil
 		})
-	}).Do()
+	})
 }

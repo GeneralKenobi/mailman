@@ -18,7 +18,7 @@ type Handler struct {
 }
 
 func (handler *Handler) HandlerFunc(request *gin.Context) {
-	wrapper.ForRequest(request, func(ctx context.Context) error {
+	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
 		ctx = mdctx.WithOperationName(ctx, "delete mailing entry with ID")
 		return wrapper.WithRequiredIntPathParam(request, "id", func(id int) error {
 			return persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
@@ -26,5 +26,5 @@ func (handler *Handler) HandlerFunc(request *gin.Context) {
 				return mailingEntryRemover.Remove(ctx, id)
 			})
 		})
-	}).Do()
+	})
 }

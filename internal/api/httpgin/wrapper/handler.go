@@ -8,111 +8,99 @@ import (
 )
 
 type SimpleHandler interface {
-	OnSuccess(onSuccess func()) SimpleHandler
-	OnError(onError func(error)) SimpleHandler
-	Do()
+	OnSuccess(onSuccess func(ctx context.Context)) SimpleHandler
+	OnError(onError func(ctx context.Context, handlerErr error)) SimpleHandler
+	Handle(handler func(ctx context.Context) error)
 }
 
-// ForRequest is a convenience standard handler. Handler func is called and, depending on its return value, on success or on error func is
-// called.
-//
-// Default on success writes status HTTP200.
-// Default on error writes error response from the error returned from the handler.
-//
-// To run the handler Do has to be called.
-func ForRequest(requestCtx *gin.Context, handler func(ctx context.Context) error) SimpleHandler {
-	ctx := request.Context(requestCtx)
+// ForRequest creates a convenience standard handler which writes status HTTP200 on success and writes an error response on error.
+// SimpleHandler.OnSuccess and SimpleHandler.OnError can be used to override the default success/error handlers.
+// The request is processed by calling SimpleHandler.Handle which also accepts the handler function.
+func ForRequest(requestCtx *gin.Context) SimpleHandler {
 	return &simpleHandler{
-		handler: func() error {
-			return handler(ctx)
-		},
-		onSuccess: func() {
+		request: requestCtx,
+		onSuccess: func(_ context.Context) {
 			requestCtx.Status(http.StatusOK)
 		},
-		onError: func(err error) {
-			request.WriteErrorResponse(ctx, requestCtx, err)
+		onError: func(ctx context.Context, handlerErr error) {
+			request.WriteErrorResponse(ctx, requestCtx, handlerErr)
 		},
 	}
 }
 
 type SimpleHandlerReturningV[V any] interface {
-	OnSuccess(onSuccessFunc func(V)) SimpleHandlerReturningV[V]
-	OnError(onError func(error)) SimpleHandlerReturningV[V]
-	Do()
+	OnSuccess(onSuccess func(ctx context.Context, handlerResult V)) SimpleHandlerReturningV[V]
+	OnError(onError func(ctx context.Context, handlerErr error)) SimpleHandlerReturningV[V]
+	Handle(handler func(ctx context.Context) (V, error))
 }
 
-// ForRequestReturningV is a convenience standard handler. Handler func is called and, depending on its return values, on success or on
-// error func is called.
-//
-// Default on success converts V to JSON and writes it together with status HTTP200.
-// Default on error writes error response from the error returned from the handler.
-//
-// To run the handler Do has to be called.
-func ForRequestReturningV[V any](requestCtx *gin.Context, handler func(ctx context.Context) (V, error)) SimpleHandlerReturningV[V] {
-	ctx := request.Context(requestCtx)
+// ForRequestReturningV creates a convenience standard handler which writes status HTTP200 on success and writes an error response on error.
+// SimpleHandler.OnSuccess and SimpleHandler.OnError can be used to override the default success/error handlers.
+// The request is processed by calling SimpleHandler.Handle which also accepts the handler function.
+func ForRequestReturningV[V any](requestCtx *gin.Context) SimpleHandlerReturningV[V] {
 	return &simpleHandlerReturningV[V]{
-		handler: func() (V, error) {
-			return handler(ctx)
+		request: requestCtx,
+		onSuccess: func(_ context.Context, handlerResult V) {
+			requestCtx.JSON(http.StatusOK, handlerResult)
 		},
-		onSuccess: func(result V) {
-			requestCtx.JSON(http.StatusOK, result)
-		},
-		onError: func(err error) {
-			request.WriteErrorResponse(ctx, requestCtx, err)
+		onError: func(ctx context.Context, handlerErr error) {
+			request.WriteErrorResponse(ctx, requestCtx, handlerErr)
 		},
 	}
 }
 
 type simpleHandlerReturningV[V any] struct {
-	handler   func() (V, error)
-	onSuccess func(V)
-	onError   func(error)
+	request   *gin.Context
+	onSuccess func(ctx context.Context, handlerResult V)
+	onError   func(ctx context.Context, handlerErr error)
 }
 
 var _ SimpleHandlerReturningV[any] = (*simpleHandlerReturningV[any])(nil) // Interface guard
 
-func (handler *simpleHandlerReturningV[V]) OnSuccess(onSuccess func(V)) SimpleHandlerReturningV[V] {
+func (handler *simpleHandlerReturningV[V]) OnSuccess(onSuccess func(ctx context.Context, handlerResult V)) SimpleHandlerReturningV[V] {
 	handler.onSuccess = onSuccess
 	return handler
 }
 
-func (handler *simpleHandlerReturningV[V]) OnError(onError func(error)) SimpleHandlerReturningV[V] {
+func (handler *simpleHandlerReturningV[V]) OnError(onError func(ctx context.Context, handlerErr error)) SimpleHandlerReturningV[V] {
 	handler.onError = onError
 	return handler
 }
 
-func (handler *simpleHandlerReturningV[V]) Do() {
-	value, err := handler.handler()
+func (handler *simpleHandlerReturningV[V]) Handle(handlerFunc func(ctx context.Context) (V, error)) {
+	ctx := request.Context(handler.request)
+	value, err := handlerFunc(ctx)
 	if err == nil {
-		handler.onSuccess(value)
+		handler.onSuccess(ctx, value)
 	} else {
-		handler.onError(err)
+		handler.onError(ctx, err)
 	}
 }
 
 type simpleHandler struct {
-	handler   func() error
-	onSuccess func()
-	onError   func(error)
+	request   *gin.Context
+	onSuccess func(ctx context.Context)
+	onError   func(ctx context.Context, handlerErr error)
 }
 
 var _ SimpleHandler = (*simpleHandler)(nil) // Interface guard
 
-func (handler *simpleHandler) OnSuccess(onSuccess func()) SimpleHandler {
+func (handler *simpleHandler) OnSuccess(onSuccess func(ctx context.Context)) SimpleHandler {
 	handler.onSuccess = onSuccess
 	return handler
 }
 
-func (handler *simpleHandler) OnError(onError func(error)) SimpleHandler {
+func (handler *simpleHandler) OnError(onError func(ctx context.Context, handlerErr error)) SimpleHandler {
 	handler.onError = onError
 	return handler
 }
 
-func (handler *simpleHandler) Do() {
-	err := handler.handler()
+func (handler *simpleHandler) Handle(handlerFunc func(ctx context.Context) error) {
+	ctx := request.Context(handler.request)
+	err := handlerFunc(ctx)
 	if err == nil {
-		handler.onSuccess()
+		handler.onSuccess(ctx)
 	} else {
-		handler.onError(err)
+		handler.onError(ctx, err)
 	}
 }
