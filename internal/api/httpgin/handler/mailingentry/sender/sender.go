@@ -32,8 +32,8 @@ func (handler *Handler) HandlerFunc(request *gin.Context) {
 			mdctx.Debugf(ctx, "Sending mailing entries with mailing ID %d", mailingRequest.MailingId)
 
 			// Use a separate transaction for stale entry cleanup because it can be committed even if sending fails later on.
-			err := persistence.WithinTransaction(ctx, handler.transactioner, func(transactionRepository persistence.Repository) error {
-				staleEntryRemover := staleremover.New(transactionRepository)
+			err := persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
+				staleEntryRemover := staleremover.New(transactionalRepository)
 				return staleEntryRemover.RemoveByMailingId(ctx, mailingRequest.MailingId)
 			})
 			if err != nil {
@@ -41,8 +41,8 @@ func (handler *Handler) HandlerFunc(request *gin.Context) {
 					mailingRequest.MailingId, err)
 			}
 
-			err = persistence.WithinTransaction(ctx, handler.transactioner, func(transactionRepository persistence.Repository) error {
-				mailer := sender.New(transactionRepository, handler.emailer)
+			err = persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
+				mailer := sender.New(transactionalRepository, handler.emailer)
 				return mailer.Send(ctx, mailingRequest)
 			})
 			if err != nil {

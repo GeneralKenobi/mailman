@@ -12,7 +12,7 @@ import (
 // If the function returns an error the transaction is rolled back and the error is returned.
 // If the function panics the transaction is rolled back and this function re-panics with the original value.
 // Error is also returned if it wasn't possible to open or commit a transaction.
-func WithinTransaction(ctx context.Context, transactioner Transactioner, todo func(transactionRepository Repository) error) error {
+func WithinTransaction(ctx context.Context, transactioner Transactioner, todo func(transactionalRepository Repository) error) error {
 	_, err := WithinTransactionReturningV(ctx, transactioner, func(transactionalRepository Repository) (any, error) {
 		return nil, todo(transactionalRepository)
 	})
