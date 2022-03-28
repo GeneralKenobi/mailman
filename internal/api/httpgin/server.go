@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/health"
-	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry/creator"
-	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry/remover"
-	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry/sender"
+	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/request"
 	"github.com/GeneralKenobi/mailman/internal/config"
 	"github.com/GeneralKenobi/mailman/internal/email"
@@ -54,9 +52,11 @@ func (server *Server) setupGinEngine() *gin.Engine {
 	ginEngine.Use(gin.Recovery(), request.ContextMiddleware, request.LogRequestProcessingMiddleware)
 
 	ginEngine.GET("/health", health.HandlerFunc)
-	ginEngine.POST("/api/messages", creator.NewHandler(server.persistenceCtx).HandlerFunc)
-	ginEngine.DELETE("/api/messages/:id", remover.NewHandler(server.persistenceCtx).HandlerFunc)
-	ginEngine.POST("/api/messages/send", sender.NewHandler(server.persistenceCtx, server.emailer).HandlerFunc)
+
+	mailingEntryHandler := mailingentry.NewHandler(server.persistenceCtx, server.emailer)
+	ginEngine.POST("/api/messages", mailingEntryHandler.CreateHandlerFunc)
+	ginEngine.DELETE("/api/messages/:id", mailingEntryHandler.DeleteHandlerFunc)
+	ginEngine.POST("/api/messages/send", mailingEntryHandler.SendMailingIdHandlerFunc)
 
 	return ginEngine
 }

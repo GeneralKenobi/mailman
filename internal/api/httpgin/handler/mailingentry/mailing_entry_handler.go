@@ -1,10 +1,13 @@
-package sender
+package mailingentry
 
 import (
 	"context"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/wrapper"
 	"github.com/GeneralKenobi/mailman/internal/persistence"
+	customercreator "github.com/GeneralKenobi/mailman/internal/service/customer/creator"
+	mailingentrycreator "github.com/GeneralKenobi/mailman/internal/service/mailingentry/creator"
+	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/remover"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/sender"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/staleremover"
 	"github.com/GeneralKenobi/mailman/pkg/api/model"
@@ -24,7 +27,33 @@ type Handler struct {
 	emailer       sender.Emailer
 }
 
-func (handler *Handler) HandlerFunc(request *gin.Context) {
+func (handler *Handler) CreateHandlerFunc(request *gin.Context) {
+	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
+		ctx = mdctx.WithOperationName(ctx, "create mailing entry")
+		return wrapper.WithBoundRequestBody(request, func(mailingEntry model.MailingEntryDto) error {
+			return persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
+				customerCreator := customercreator.New(transactionalRepository)
+				mailingEntryCreator := mailingentrycreator.New(transactionalRepository, customerCreator)
+				_, err := mailingEntryCreator.CreateFromDto(ctx, mailingEntry)
+				return err
+			})
+		})
+	})
+}
+
+func (handler *Handler) DeleteHandlerFunc(request *gin.Context) {
+	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
+		ctx = mdctx.WithOperationName(ctx, "delete mailing entry with ID")
+		return wrapper.WithRequiredIntPathParam(request, "id", func(id int) error {
+			return persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
+				mailingEntryRemover := remover.New(transactionalRepository)
+				return mailingEntryRemover.Remove(ctx, id)
+			})
+		})
+	})
+}
+
+func (handler *Handler) SendMailingIdHandlerFunc(request *gin.Context) {
 	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
 		ctx = mdctx.WithOperationName(ctx, "send mailing entries with mailing ID")
 
