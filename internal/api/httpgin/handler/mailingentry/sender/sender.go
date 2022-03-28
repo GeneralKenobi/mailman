@@ -43,7 +43,7 @@ func (handler *Handler) HandlerFunc(request *gin.Context) {
 
 			err = persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
 				mailer := sender.New(transactionalRepository, handler.emailer)
-				return mailer.Send(ctx, mailingRequest)
+				return mailer.SendMailingRequest(ctx, mailingRequest)
 			})
 			if err != nil {
 				return fmt.Errorf("error sending mailing entries with ID %d: %w", mailingRequest.MailingId, err)

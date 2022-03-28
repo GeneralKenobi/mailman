@@ -15,12 +15,12 @@ type Repository interface {
 	DeleteMailingEntryById(ctx context.Context, id int) error
 }
 
-type StaleEntryRemover struct {
-	repository Repository
-}
-
 func New(repository Repository) *StaleEntryRemover {
 	return &StaleEntryRemover{repository: repository}
+}
+
+type StaleEntryRemover struct {
+	repository Repository
 }
 
 // RemoveByMailingId finds and removes all mailing entries with the given mailing ID that are older than the configured threshold.
