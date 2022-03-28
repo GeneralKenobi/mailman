@@ -15,6 +15,11 @@ func (repository *Repository) FindCustomerByEmail(ctx context.Context, email str
 		"SELECT id, email FROM mailmandb.customer WHERE email = $1", email)
 }
 
+func (repository *Repository) InsertCustomer(ctx context.Context, customer model.Customer) (model.Customer, error) {
+	return selectingOne(ctx, "insert customer", repository.sql, customerRowScanSupplier,
+		"INSERT INTO mailmandb.customer(email) VALUES($1) RETURNING id, email", customer.Email)
+}
+
 func (repository *Repository) DeleteCustomerById(ctx context.Context, id int) error {
 	return affectingOne(ctx, "delete customer by ID", repository.sql,
 		"DELETE FROM mailmandb.customer WHERE id = $1", id)

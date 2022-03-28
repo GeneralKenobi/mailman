@@ -44,6 +44,8 @@ type CustomerRepository interface {
 	FindCustomerById(ctx context.Context, id int) (model.Customer, error)
 	FindCustomerByEmail(ctx context.Context, email string) (model.Customer, error)
 
+	InsertCustomer(ctx context.Context, customer model.Customer) (model.Customer, error)
+
 	DeleteCustomerById(ctx context.Context, id int) error
 }
 
@@ -52,6 +54,10 @@ type MailingEntryRepository interface {
 	FindMailingEntriesOlderThan(ctx context.Context, olderThan time.Duration) ([]model.MailingEntry, error)
 	FindMailingEntriesByMailingIdOlderThan(ctx context.Context, mailingId int, olderThan time.Duration) ([]model.MailingEntry, error)
 	FindMailingEntriesByCustomerId(ctx context.Context, id int) ([]model.MailingEntry, error)
+	FindMailingEntriesByCustomerIdMailingIdTitleContentInsertTime(
+		ctx context.Context, customerId, mailingId int, title, content string, insertTime time.Time) ([]model.MailingEntry, error)
+
+	InsertMailingEntry(ctx context.Context, mailingEntry model.MailingEntry) (model.MailingEntry, error)
 
 	DeleteMailingEntryById(ctx context.Context, id int) error
 }
