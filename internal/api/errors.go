@@ -21,13 +21,20 @@ const (
 	StatusInternalError Status = "internal error"
 )
 
-var _ StatusError = (*statusError)(nil) // Interface guard
+func (status Status) Error() string {
+	return string(status)
+}
 
-func (status Status) Error(messageFormat string, args ...any) StatusError {
+var (
+	_ error       = (*Status)(nil)      // Interface guard
+	_ StatusError = (*statusError)(nil) // Interface guard
+)
+
+func (status Status) WithMessage(messageFormat string, args ...any) StatusError {
 	return Error(status, messageFormat, args...)
 }
 
-func (status Status) ErrorWithCause(cause error, messageFormat string, args ...any) StatusError {
+func (status Status) WithMessageAndCause(cause error, messageFormat string, args ...any) StatusError {
 	return ErrorWithCause(status, cause, messageFormat, args...)
 }
 

@@ -36,7 +36,7 @@ const requestContextKey = "requestContext"
 func WriteErrorResponse(ctx context.Context, request *gin.Context, err error) {
 	var apiError api.StatusError
 	if !errors.As(err, &apiError) {
-		apiError = api.StatusInternalError.ErrorWithCause(err, "Request processing failed")
+		apiError = api.StatusInternalError.WithMessageAndCause(err, "Request processing failed")
 	}
 
 	mdctx.Errorf(ctx, "Error processing request: %v", apiError)

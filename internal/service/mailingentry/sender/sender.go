@@ -40,7 +40,7 @@ func (sender *EntrySender) Send(ctx context.Context, mailingRequest apimodel.Mai
 
 	mdctx.Debugf(ctx, "Found %d mailing entries with mailing ID %d", len(entries), mailingRequest.MailingId)
 	if len(entries) == 0 {
-		return api.StatusNotFound.Error("no mailing entries to send")
+		return api.StatusNotFound.WithMessage("no mailing entries to send")
 	}
 
 	for _, entry := range entries {

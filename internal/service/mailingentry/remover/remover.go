@@ -24,7 +24,7 @@ func (remover *Remover) Remove(ctx context.Context, id int) error {
 	mdctx.Infof(ctx, "Deleting mailing entry %d", id)
 	err := remover.repository.DeleteMailingEntryById(ctx, id)
 	if err != nil && errors.Is(err, persistence.ErrNoRows) {
-		return api.StatusNotFound.ErrorWithCause(err, "mailing entry with ID %d doesn't exist", id)
+		return api.StatusNotFound.WithMessageAndCause(err, "mailing entry with ID %d doesn't exist", id)
 	}
 	return err
 }
