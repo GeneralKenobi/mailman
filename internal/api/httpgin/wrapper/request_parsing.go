@@ -20,7 +20,7 @@ func WithBoundRequestBodyReturningV[T, V any](request *gin.Context, todo func(re
 	var requestBody T
 	err := request.ShouldBindJSON(&requestBody)
 	if err != nil {
-		return util.ZeroValue[V](), api.StatusBadRequest.ErrorWithCause(err, "request body is invalid")
+		return util.ZeroValue[V](), api.StatusBadInput.ErrorWithCause(err, "request body is invalid")
 	}
 
 	return todo(requestBody)
@@ -43,7 +43,7 @@ func WithRequiredIntPathParamReturningV[V any](request *gin.Context, paramName s
 	return WithRequiredPathParamReturningV[V](request, paramName, func(param string) (V, error) {
 		paramAsInt, err := strconv.Atoi(param)
 		if err != nil {
-			return util.ZeroValue[V](), api.StatusBadRequest.Error("path parameter %s has to be an integer", paramName)
+			return util.ZeroValue[V](), api.StatusBadInput.Error("path parameter %s has to be an integer", paramName)
 		}
 		return todo(paramAsInt)
 	})
@@ -63,7 +63,7 @@ func WithRequiredPathParam(request *gin.Context, paramName string, todo func(par
 func WithRequiredPathParamReturningV[V any](request *gin.Context, paramName string, todo func(param string) (V, error)) (V, error) {
 	param := request.Param(paramName)
 	if param == "" {
-		return util.ZeroValue[V](), api.StatusBadRequest.Error("path parameter %s is required", paramName)
+		return util.ZeroValue[V](), api.StatusBadInput.Error("path parameter %s is required", paramName)
 	}
 
 	return todo(param)

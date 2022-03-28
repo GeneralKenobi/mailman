@@ -15,7 +15,7 @@ type StatusError interface {
 type Status string
 
 const (
-	StatusBadRequest    Status = "bad request"
+	StatusBadInput      Status = "bad input"
 	StatusNotFound      Status = "not found"
 	StatusUnauthorized  Status = "unauthorized"
 	StatusInternalError Status = "internal error"

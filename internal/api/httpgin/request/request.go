@@ -51,7 +51,7 @@ func WriteErrorResponse(ctx context.Context, request *gin.Context, err error) {
 
 func apiStatusToHttpStatus(status api.Status) int {
 	switch status {
-	case api.StatusBadRequest:
+	case api.StatusBadInput:
 		return http.StatusBadRequest
 	case api.StatusUnauthorized:
 		return http.StatusUnauthorized
