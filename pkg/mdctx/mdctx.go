@@ -140,11 +140,11 @@ func loggingFileAndLine() string {
 	pathSegments := strings.Split(filepath, "/")
 	file := pathSegments[len(pathSegments)-1]
 	// Trim the file to maintain coherent logging format (20 corresponds to %20s in Sprintf below, which pads filename to 20 characters)
-	if len(file) > 20 {
-		file = "..." + file[len(file)-17:]
+	if len(file) > 27 {
+		file = "..." + file[len(file)-24:]
 	}
 
-	return fmt.Sprintf("%20s:%-4d", file, lineNumber)
+	return fmt.Sprintf("%27s:%-4d", file, lineNumber)
 }
 
 func mdcLabels(ctx context.Context) string {
