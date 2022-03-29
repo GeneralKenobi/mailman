@@ -35,6 +35,18 @@ spec:
               mountPath: /etc/mailman/config
             - name: secret-config-volume
               mountPath: /etc/mailman/secret-config
+          livenessProbe:
+            httpGet:
+              port: http
+              path: /health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: http
+              path: /health
+            initialDelaySeconds: 5
+            periodSeconds: 5
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

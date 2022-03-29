@@ -10,7 +10,6 @@ import (
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	_ "github.com/lib/pq" // Postgres driver registration by import.
-	"time"
 )
 
 // Context implements DB integration for postgres.
@@ -31,14 +30,6 @@ func NewContext(ctx shutdown.Context) (*Context, error) {
 	}
 
 	dbCtx := Context{db: db}
-
-	readinessCheckCtx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.DefaultTimeoutSeconds)*time.Second)
-	defer cancel()
-	if err = dbCtx.ReadinessCheck(readinessCheckCtx); err != nil {
-		shutdownDb(dbCtx.db)
-		return nil, fmt.Errorf("initial readiness check failed: %w", err)
-	}
-
 	go shutdownDbOnContextCancellation(ctx, db)
 	return &dbCtx, nil
 }
@@ -58,15 +49,6 @@ func shutdownDb(db *sql.DB) {
 		mdctx.Errorf(nil, "Error closing DB connection: %v", err)
 	}
 	mdctx.Infof(nil, "DB connection closed")
-}
-
-func (postgresCtx *Context) ReadinessCheck(ctx context.Context) error {
-	err := postgresCtx.db.PingContext(ctx)
-	if err != nil {
-		return fmt.Errorf("readiness check with ping failed: %w", err)
-	}
-
-	return nil
 }
 
 func (postgresCtx *Context) Repository(ctx context.Context) (persistence.Repository, error) {
