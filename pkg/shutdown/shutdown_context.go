@@ -72,7 +72,7 @@ func (parent *parentContext) cancelChildren() {
 	parent.hasBeenCanceled = true
 
 	for _, child := range parent.children {
-		mdctx.Debugf(nil, "Signaling shutdown to context %s", child.name)
+		mdctx.Debugf(nil, "Signaling shutdown to context %q", child.name)
 		close(child.done)
 	}
 }
@@ -93,12 +93,12 @@ func (parent *parentContext) waitForChildren() {
 // waitForChild waits for child to notify that shutdown has completed or for ctx to be canceled, whichever occurs first, and subtracts
 // itself from the wait group.
 func (parent *parentContext) waitForChild(ctx context.Context, waitGroup *sync.WaitGroup, child *childContext) {
-	mdctx.Debugf(nil, "Waiting for child %s", child.name)
+	mdctx.Debugf(nil, "Waiting for child %q", child.name)
 	select {
 	case <-child.notify:
-		mdctx.Debugf(nil, "Child %s completed shutdown", child.name)
+		mdctx.Debugf(nil, "Child %q completed shutdown", child.name)
 	case <-ctx.Done():
-		mdctx.Debugf(nil, "Child %s didn't complete shutdown in time", child.name)
+		mdctx.Debugf(nil, "Child %q didn't complete shutdown in time", child.name)
 	}
 	waitGroup.Done()
 }

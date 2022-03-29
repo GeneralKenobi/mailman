@@ -4,6 +4,7 @@ import (
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin"
 	"github.com/GeneralKenobi/mailman/internal/config"
 	"github.com/GeneralKenobi/mailman/internal/email/mock"
+	"github.com/GeneralKenobi/mailman/internal/job/mailingentry"
 	"github.com/GeneralKenobi/mailman/internal/persistence/postgres"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
@@ -45,9 +46,13 @@ func bootstrap(parentCtx shutdown.ParentContext) {
 	// Email service
 	emailer := mock.NewEmailer()
 
+	// Scheduled jobs
+	mailingEntryCleanupJob := mailingentry.NewCleanupJob(persistenceCtx)
+	go mailingEntryCleanupJob.RunScheduled(parentCtx.NewContext("scheduled stale mailing entry cleanup"))
+
 	// HTTP server
 	httpServer := httpgin.NewServer(persistenceCtx, emailer)
-	go httpServer.Start(parentCtx.NewContext("http server"))
+	go httpServer.Run(parentCtx.NewContext("http server"))
 }
 
 func shutdownAfterStopSignal(parentCtx shutdown.ParentContext) {

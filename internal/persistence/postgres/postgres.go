@@ -44,10 +44,11 @@ func NewContext(ctx shutdown.Context) (*Context, error) {
 }
 
 func shutdownDbOnContextCancellation(ctx shutdown.Context, db *sql.DB) {
+	defer ctx.Notify()
+
 	<-ctx.Done()
 	mdctx.Infof(nil, "DB context canceled")
 	shutdownDb(db)
-	ctx.Notify()
 }
 
 func shutdownDb(db *sql.DB) {

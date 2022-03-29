@@ -10,6 +10,9 @@ var defaultConfig = Config{
 		DefaultTimeoutSeconds: 30,
 	},
 	StaleMailingEntryRemover: StaleMailingEntryRemover{
-		StalenessThresholdSeconds: 2 * 60 * 60,
+		StalenessThresholdSeconds: 5 * 60, // 5 minutes
+	},
+	MailingEntryCleanupJob: MailingEntryCleanupJob{
+		PeriodSeconds: 60 * 60, // 1 hour
 	},
 }

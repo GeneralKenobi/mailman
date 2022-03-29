@@ -5,6 +5,7 @@ type Config struct {
 	HttpServer               HttpServer               `json:"httpServer"`
 	Postgres                 Postgres                 `json:"postgres"`
 	StaleMailingEntryRemover StaleMailingEntryRemover `json:"staleMailingEntryRemover"`
+	MailingEntryCleanupJob   MailingEntryCleanupJob   `json:"mailingEntryCleanupJob"`
 }
 
 // HttpServer stores configuration for the HTTP server.
@@ -25,4 +26,8 @@ type Postgres struct {
 
 type StaleMailingEntryRemover struct {
 	StalenessThresholdSeconds int `json:"stalenessThresholdSeconds"`
+}
+
+type MailingEntryCleanupJob struct {
+	PeriodSeconds int `json:"periodSeconds"`
 }

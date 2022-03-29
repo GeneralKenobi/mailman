@@ -30,8 +30,8 @@ type Server struct {
 	httpServer     *http.Server
 }
 
-// Start starts the HTTP server and shuts it down gracefully when ctx is cancelled.
-func (server *Server) Start(ctx shutdown.Context) {
+// Run starts the HTTP server and shuts it down gracefully when ctx is cancelled.
+func (server *Server) Run(ctx shutdown.Context) {
 	go server.listenAndServe()
 	server.shutdownOnContextCancellation(ctx)
 }
@@ -72,6 +72,8 @@ func (server *Server) listenAndServe() {
 }
 
 func (server *Server) shutdownOnContextCancellation(ctx shutdown.Context) {
+	defer ctx.Notify()
+
 	<-ctx.Done()
 	mdctx.Infof(nil, "Context canceled - shutting down HTTP server")
 	serverShutdownCtx, cancel := context.WithTimeout(context.Background(), ctx.Timeout())
@@ -83,5 +85,4 @@ func (server *Server) shutdownOnContextCancellation(ctx shutdown.Context) {
 	} else {
 		mdctx.Infof(nil, "HTTP server shutdown completed")
 	}
-	ctx.Notify()
 }
