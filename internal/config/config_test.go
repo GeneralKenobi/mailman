@@ -75,7 +75,7 @@ func TestLoad(t *testing.T) {
 				t.Errorf("Expected no error but got %v", err)
 			}
 			if result != test.expected {
-				t.Errorf("Expected %+v\nGot %+v", test.expected, result)
+				t.Errorf("Expected %#v\nGot %#v", test.expected, result)
 			}
 		})
 	}
