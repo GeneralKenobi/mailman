@@ -22,5 +22,5 @@ func LogRequestProcessingMiddleware(request *gin.Context) {
 	ctx := Context(request)
 	mdctx.Infof(ctx, "Begin processing")
 	request.Next()
-	mdctx.Infof(ctx, "End processing")
+	mdctx.Debugf(ctx, "End processing")
 }

@@ -2,19 +2,23 @@ package config
 
 // Config aggregates configuration for modules.
 type Config struct {
+	Global                   Global                   `json:"global"`
 	HttpServer               HttpServer               `json:"httpServer"`
 	Postgres                 Postgres                 `json:"postgres"`
 	StaleMailingEntryRemover StaleMailingEntryRemover `json:"staleMailingEntryRemover"`
 	MailingEntryCleanupJob   MailingEntryCleanupJob   `json:"mailingEntryCleanupJob"`
 }
 
-// HttpServer stores configuration for the HTTP server.
+// Global contains general configuration or configuration for the entire application.
+type Global struct {
+	ShutdownTimeoutSeconds int `json:"shutdownTimeoutSeconds"` // Maximum time for graceful shutdown of the application
+}
+
 type HttpServer struct {
 	Port                   int `json:"port"`                   // Port to listen on
 	ShutdownTimeoutSeconds int `json:"shutdownTimeoutSeconds"` // Graceful shutdown time
 }
 
-// Postgres stores configuration for connecting to the postgres database.
 type Postgres struct {
 	Host                  string `json:"host"`                  // DB server host, e.g. my-postgres.com or 10.101.146.170
 	Port                  int    `json:"port"`                  // Port the DB is listening on
@@ -25,9 +29,9 @@ type Postgres struct {
 }
 
 type StaleMailingEntryRemover struct {
-	StalenessThresholdSeconds int `json:"stalenessThresholdSeconds"`
+	StalenessThresholdSeconds int `json:"stalenessThresholdSeconds"` // Time after which a mailing entry is removed due to old age
 }
 
 type MailingEntryCleanupJob struct {
-	PeriodSeconds int `json:"periodSeconds"`
+	PeriodSeconds int `json:"periodSeconds"` // Period for scheduled cleanup of mailing entries
 }

@@ -16,8 +16,7 @@ import (
 
 func main() {
 	configure()
-	// TODO: Shutdown time configuration
-	parentCtx := shutdown.NewParentContext(30 * time.Second)
+	parentCtx := shutdown.NewParentContext(time.Duration(config.Get().Global.ShutdownTimeoutSeconds) * time.Second)
 	bootstrap(parentCtx)
 	shutdownAfterStopSignal(parentCtx)
 }

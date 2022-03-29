@@ -68,8 +68,6 @@ func TestLoad(t *testing.T) {
 			err := Load(test.inputConfigFilePaths)
 			result := Get()
 
-			// TODO: Extract error comparison to helper func
-			// TODO: Extract pretty print to helper func
 			if test.expectError && err == nil {
 				t.Errorf("Expected an error but got none")
 			}
