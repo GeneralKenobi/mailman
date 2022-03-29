@@ -4,10 +4,13 @@ import (
 	"github.com/GeneralKenobi/mailman/internal/api"
 	"github.com/GeneralKenobi/mailman/pkg/util"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"strconv"
+	"strings"
 )
 
-// WithBoundRequestBody binds JSON request body to an instance of T and calls the given function if the binding was successful.
+// WithBoundRequestBody binds JSON request body to an instance of T and validates it. If both operations were successful calls the
+// given function.
 func WithBoundRequestBody[T any](request *gin.Context, todo func(requestBody T) error) error {
 	_, err := WithBoundRequestBodyReturningV(request, func(requestBody T) (any, error) {
 		return nil, todo(requestBody)
@@ -15,16 +18,43 @@ func WithBoundRequestBody[T any](request *gin.Context, todo func(requestBody T) 
 	return err
 }
 
-// WithBoundRequestBodyReturningV binds JSON request body to an instance of T and calls the given function if the binding was successful.
+// WithBoundRequestBodyReturningV binds JSON request body to an instance of T and validates it. If both operations were successful calls the
+// given function.
 func WithBoundRequestBodyReturningV[T, V any](request *gin.Context, todo func(requestBody T) (V, error)) (V, error) {
 	var requestBody T
 	err := request.ShouldBindJSON(&requestBody)
 	if err != nil {
-		return util.ZeroValue[V](), api.StatusBadInput.WithMessageAndCause(err, "request body is invalid")
+		return util.ZeroValue[V](), api.StatusBadInput.WithMessageAndCause(err, "malformed request body")
+	}
+	err = validateRequestBody(requestBody)
+	if err != nil {
+		return util.ZeroValue[V](), err
 	}
 
 	return todo(requestBody)
 }
+
+// validateRequestBody validates a request body. If there were validation errors it converts them into a api.StatusBadInput error.
+func validateRequestBody(toValidate any) error {
+	err := validate.Struct(toValidate)
+	if err == nil {
+		return nil
+	}
+
+	validationErrs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		return api.StatusBadInput.WithMessageAndCause(err, "invalid request body")
+	}
+
+	validationMessages := make([]string, len(validationErrs))
+	for i, validationErr := range validationErrs {
+		validationMessages[i] = validationErr.Namespace() + ": " + validationErr.Tag()
+	}
+	return api.StatusBadInput.WithMessageAndCause(err, "invalid request body: %s", strings.Join(validationMessages, ", "))
+}
+
+// Use a single instance of Validate, it caches struct info.
+var validate = validator.New()
 
 // WithRequiredIntPathParam finds parameter paramName in the path and tries to convert it to an integer. If it succeeds then it calls the
 // given function with the converted value.
