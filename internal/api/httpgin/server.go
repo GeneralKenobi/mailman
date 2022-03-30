@@ -7,27 +7,27 @@ import (
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/handler/mailingentry"
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin/request"
 	"github.com/GeneralKenobi/mailman/internal/config"
+	"github.com/GeneralKenobi/mailman/internal/db"
 	"github.com/GeneralKenobi/mailman/internal/email"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func NewServer(persistenceCtx persistence.Context, emailer email.Service) *Server {
+func NewServer(dbCtx db.Context, emailer email.Service) *Server {
 	server := Server{
-		persistenceCtx: persistenceCtx,
-		emailer:        emailer,
+		dbCtx:   dbCtx,
+		emailer: emailer,
 	}
 	server.configure()
 	return &server
 }
 
 type Server struct {
-	persistenceCtx persistence.Context
-	emailer        email.Service
-	httpServer     *http.Server
+	dbCtx      db.Context
+	emailer    email.Service
+	httpServer *http.Server
 }
 
 // Run starts the HTTP server and shuts it down gracefully when ctx is cancelled.
@@ -53,7 +53,7 @@ func (server *Server) setupGinEngine() *gin.Engine {
 
 	ginEngine.GET("/health", health.HandlerFunc)
 
-	mailingEntryHandler := mailingentry.NewHandler(server.persistenceCtx, server.emailer)
+	mailingEntryHandler := mailingentry.NewHandler(server.dbCtx, server.emailer)
 	ginEngine.POST("/api/messages", mailingEntryHandler.CreateHandlerFunc)
 	ginEngine.DELETE("/api/messages/:id", mailingEntryHandler.DeleteHandlerFunc)
 	ginEngine.POST("/api/messages/send", mailingEntryHandler.SendMailingIdHandlerFunc)

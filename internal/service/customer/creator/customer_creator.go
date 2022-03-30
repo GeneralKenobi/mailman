@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
+	"github.com/GeneralKenobi/mailman/internal/db"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 )
 
@@ -52,7 +52,7 @@ func (creator *Creator) assertEmailIsNotUsed(ctx context.Context, email string) 
 		mdctx.Debugf(ctx, "Email is already used by customer %d", customer.Id)
 		return api.StatusBadInput.WithMessage("customer with this email already exists")
 	}
-	if errors.Is(err, persistence.ErrNoRows) {
+	if errors.Is(err, db.ErrNoRows) {
 		mdctx.Debugf(ctx, "No customer found - email is available")
 		return nil
 	}

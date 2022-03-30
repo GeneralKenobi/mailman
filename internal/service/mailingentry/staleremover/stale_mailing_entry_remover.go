@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/config"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"time"
 )

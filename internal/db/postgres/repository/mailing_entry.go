@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
 	"time"
 )
 

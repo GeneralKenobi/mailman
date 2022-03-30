@@ -3,9 +3,9 @@ package creator
 import (
 	"context"
 	"github.com/GeneralKenobi/mailman/internal/api"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
-	apimodel "github.com/GeneralKenobi/mailman/pkg/api/model"
+	"github.com/GeneralKenobi/mailman/internal/db"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
+	"github.com/GeneralKenobi/mailman/pkg/api/apimodel"
 	"testing"
 	"time"
 )
@@ -20,7 +20,7 @@ func TestCreateFromDtoCustomerAlreadyExists(t *testing.T) {
 		Content:    "test content",
 		InsertTime: time.Now(),
 	}
-	input := apimodel.MailingEntryDto{
+	input := apimodel.MailingEntry{
 		MailingId:  expected.MailingId,
 		Email:      "test@test.com",
 		Title:      expected.Title,
@@ -87,7 +87,7 @@ func TestCreateFromDtoCustomerDoesNotExistYet(t *testing.T) {
 		Content:    "test content",
 		InsertTime: time.Now(),
 	}
-	input := apimodel.MailingEntryDto{
+	input := apimodel.MailingEntry{
 		MailingId:  expected.MailingId,
 		Email:      "test@test.com",
 		Title:      expected.Title,
@@ -113,7 +113,7 @@ func TestCreateFromDtoCustomerDoesNotExistYet(t *testing.T) {
 				t.Fatalf("expected email %q, got %q", input.Email, email)
 			}
 
-			return model.Customer{}, persistence.ErrNoRows
+			return model.Customer{}, db.ErrNoRows
 		},
 		findMailingEntriesByCustomerIdMailingIdTitleContentInsertTime: func(ctx context.Context, customerId, mailingId int, title, content string, insertTime time.Time) ([]model.MailingEntry, error) {
 			queried := model.MailingEntry{
@@ -156,7 +156,7 @@ func TestCreateFromDtoMailingEntryAlreadyExists(t *testing.T) {
 		Content:    "test content",
 		InsertTime: time.Now(),
 	}
-	input := apimodel.MailingEntryDto{
+	input := apimodel.MailingEntry{
 		MailingId:  expected.MailingId,
 		Email:      "test@test.com",
 		Title:      expected.Title,

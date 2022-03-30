@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
 )
 
 func (repository *Repository) FindCustomerById(ctx context.Context, id int) (model.Customer, error) {

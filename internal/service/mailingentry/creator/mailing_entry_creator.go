@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
-	apimodel "github.com/GeneralKenobi/mailman/pkg/api/model"
+	"github.com/GeneralKenobi/mailman/internal/db"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
+	"github.com/GeneralKenobi/mailman/pkg/api/apimodel"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"time"
 )
@@ -37,7 +37,7 @@ type Creator struct {
 
 // CreateFromDto creates a new mailing entry. It finds or creates a new user based on the email in the DTO.
 // This operation is idempotent - same mailing entry can't be created twice. In that case api.StatusBadInput is returned.
-func (creator *Creator) CreateFromDto(ctx context.Context, mailingEntryDto apimodel.MailingEntryDto) (model.MailingEntry, error) {
+func (creator *Creator) CreateFromDto(ctx context.Context, mailingEntryDto apimodel.MailingEntry) (model.MailingEntry, error) {
 	customer, err := creator.getOrCreateCustomer(ctx, mailingEntryDto.Email)
 	if err != nil {
 		return model.MailingEntry{}, fmt.Errorf("error resolving customer for new mailing entry: %w", err)
@@ -64,7 +64,7 @@ func (creator *Creator) getOrCreateCustomer(ctx context.Context, email string) (
 		mdctx.Debugf(ctx, "Customer already exists (ID %d)", customer.Id)
 		return customer, nil
 	}
-	if !errors.Is(err, persistence.ErrNoRows) {
+	if !errors.Is(err, db.ErrNoRows) {
 		return model.Customer{}, fmt.Errorf("error finding customer by email: %w", err)
 	}
 

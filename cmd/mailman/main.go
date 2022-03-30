@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/GeneralKenobi/mailman/internal/api/httpgin"
 	"github.com/GeneralKenobi/mailman/internal/config"
+	"github.com/GeneralKenobi/mailman/internal/db/postgres"
 	"github.com/GeneralKenobi/mailman/internal/email/mock"
 	"github.com/GeneralKenobi/mailman/internal/job/mailingentry"
-	"github.com/GeneralKenobi/mailman/internal/persistence/postgres"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	"os"
@@ -37,7 +37,7 @@ func configure() {
 
 func bootstrap(parentCtx shutdown.ParentContext) {
 	// DB
-	persistenceCtx, err := postgres.NewContext(parentCtx.NewContext("postgres"))
+	dbCtx, err := postgres.NewContext(parentCtx.NewContext("postgres"))
 	if err != nil {
 		mdctx.Fatalf(nil, "Error connecting to DB: %v", err)
 	}
@@ -46,11 +46,11 @@ func bootstrap(parentCtx shutdown.ParentContext) {
 	emailer := mock.NewEmailer()
 
 	// Scheduled jobs
-	mailingEntryCleanupJob := mailingentry.NewCleanupJob(persistenceCtx)
+	mailingEntryCleanupJob := mailingentry.NewCleanupJob(dbCtx)
 	go mailingEntryCleanupJob.RunScheduled(parentCtx.NewContext("scheduled stale mailing entry cleanup"))
 
 	// HTTP server
-	httpServer := httpgin.NewServer(persistenceCtx, emailer)
+	httpServer := httpgin.NewServer(dbCtx, emailer)
 	go httpServer.Run(parentCtx.NewContext("http server"))
 }
 

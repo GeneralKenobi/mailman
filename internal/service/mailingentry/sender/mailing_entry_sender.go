@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/api"
-	"github.com/GeneralKenobi/mailman/internal/persistence/model"
-	apimodel "github.com/GeneralKenobi/mailman/pkg/api/model"
+	"github.com/GeneralKenobi/mailman/internal/db/model"
+	"github.com/GeneralKenobi/mailman/pkg/api/apimodel"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 )
 
@@ -32,7 +32,7 @@ type EntrySender struct {
 }
 
 // SendMailingRequest sends email for every mailing entry with the given mailing ID and deletes them from the database.
-func (sender *EntrySender) SendMailingRequest(ctx context.Context, mailingRequest apimodel.MailingRequestDto) (err error) {
+func (sender *EntrySender) SendMailingRequest(ctx context.Context, mailingRequest apimodel.MailingRequest) (err error) {
 	entries, err := sender.repository.FindMailingEntriesByMailingId(ctx, mailingRequest.MailingId)
 	if err != nil {
 		return fmt.Errorf("error listing mailing entries: %w", err)

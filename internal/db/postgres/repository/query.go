@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
+	"github.com/GeneralKenobi/mailman/internal/db"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/util"
 )
@@ -37,8 +37,8 @@ func selectingAll[T any](ctx context.Context, queryName string, sql SqlExecutor,
 	return items, err
 }
 
-// selectingOne executes the query and converts the obtained row into an instance of T. It returns wrapped persistence.ErrNoRows if the
-// query returned no rows and persistence.ErrTooManyRows if the query returned more than 1 row.
+// selectingOne executes the query and converts the obtained row into an instance of T. It returns wrapped db.ErrNoRows if the
+// query returned no rows and db.ErrTooManyRows if the query returned more than 1 row.
 //
 // queryName is only used in error messages.
 func selectingOne[T any](ctx context.Context, queryName string, sql SqlExecutor, rowScanSupplier rowScanSupplier[T],
@@ -51,7 +51,7 @@ func selectingOne[T any](ctx context.Context, queryName string, sql SqlExecutor,
 	defer closeRows(ctx, rows)
 
 	if !rows.Next() {
-		return util.ZeroValue[T](), fmt.Errorf("%s: %w", queryName, persistence.ErrNoRows)
+		return util.ZeroValue[T](), fmt.Errorf("%s: %w", queryName, db.ErrNoRows)
 	}
 	result, props := rowScanSupplier()
 	err = rows.Scan(props...)
@@ -59,7 +59,7 @@ func selectingOne[T any](ctx context.Context, queryName string, sql SqlExecutor,
 		return util.ZeroValue[T](), err
 	}
 	if rows.Next() {
-		return util.ZeroValue[T](), fmt.Errorf("%s: %w", queryName, persistence.ErrTooManyRows)
+		return util.ZeroValue[T](), fmt.Errorf("%s: %w", queryName, db.ErrTooManyRows)
 	}
 	return *result, err
 }
@@ -81,7 +81,7 @@ func affectingMany(ctx context.Context, queryName string, sql SqlExecutor, query
 	return affectedRowsCount, nil
 }
 
-// affectingOne executes the query. It returns wrapped persistence.ErrNoRows if the query affected no rows and persistence.ErrTooManyRows
+// affectingOne executes the query. It returns wrapped db.ErrNoRows if the query affected no rows and db.ErrTooManyRows
 // if the query affected more than 1 row.
 //
 // queryName is only used in error messages.
@@ -92,10 +92,10 @@ func affectingOne(ctx context.Context, queryName string, sql SqlExecutor, query 
 	}
 
 	if affectedRowsCount == 0 {
-		return fmt.Errorf("%s: %w", queryName, persistence.ErrNoRows)
+		return fmt.Errorf("%s: %w", queryName, db.ErrNoRows)
 	}
 	if affectedRowsCount > 1 {
-		return fmt.Errorf("%s: %w", queryName, persistence.ErrTooManyRows)
+		return fmt.Errorf("%s: %w", queryName, db.ErrTooManyRows)
 	}
 	return nil
 }

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/GeneralKenobi/mailman/internal/config"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
-	"github.com/GeneralKenobi/mailman/internal/persistence/postgres/repository"
+	"github.com/GeneralKenobi/mailman/internal/db"
+	"github.com/GeneralKenobi/mailman/internal/db/postgres/repository"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	_ "github.com/lib/pq" // Postgres driver registration by import.
@@ -17,7 +17,7 @@ type Context struct {
 	db *sql.DB
 }
 
-var _ persistence.Context = (*Context)(nil) // Interface guard
+var _ db.Context = (*Context)(nil) // Interface guard
 
 // NewContext creates a postgres DB context. The DB client is closed when context is canceled.
 func NewContext(ctx shutdown.Context) (*Context, error) {
@@ -51,11 +51,11 @@ func shutdownDb(db *sql.DB) {
 	mdctx.Infof(nil, "DB connection closed")
 }
 
-func (postgresCtx *Context) Repository(ctx context.Context) (persistence.Repository, error) {
+func (postgresCtx *Context) Repository(ctx context.Context) (db.Repository, error) {
 	return repository.New(postgresCtx.db), nil
 }
 
-func (postgresCtx *Context) TransactionalRepository(ctx context.Context) (persistence.Repository, persistence.Transaction, error) {
+func (postgresCtx *Context) TransactionalRepository(ctx context.Context) (db.Repository, db.Transaction, error) {
 	transaction, err := postgresCtx.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error beginning a transaction: %w", err)
@@ -66,12 +66,12 @@ func (postgresCtx *Context) TransactionalRepository(ctx context.Context) (persis
 	return transactionalRepository, transactionCtx, nil
 }
 
-// transactionContext implements the persistence.Transaction interface.
+// transactionContext implements the db.Transaction interface.
 type transactionContext struct {
 	transaction *sql.Tx
 }
 
-var _ persistence.Transaction = (*transactionContext)(nil) // Interface guard
+var _ db.Transaction = (*transactionContext)(nil) // Interface guard
 
 func (transactionCtx *transactionContext) Commit() error {
 	return transactionCtx.transaction.Commit()

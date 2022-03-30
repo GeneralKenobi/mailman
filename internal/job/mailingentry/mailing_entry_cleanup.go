@@ -3,19 +3,19 @@ package mailingentry
 import (
 	"context"
 	"github.com/GeneralKenobi/mailman/internal/config"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
+	"github.com/GeneralKenobi/mailman/internal/db"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/staleremover"
 	"github.com/GeneralKenobi/mailman/pkg/scheduler"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	"time"
 )
 
-func NewCleanupJob(transactioner persistence.Transactioner) *CleanupJob {
+func NewCleanupJob(transactioner db.Transactioner) *CleanupJob {
 	return &CleanupJob{transactioner: transactioner}
 }
 
 type CleanupJob struct {
-	transactioner persistence.Transactioner
+	transactioner db.Transactioner
 }
 
 // RunScheduled runs stale entry cleanup periodically until the context is canceled.
@@ -25,8 +25,8 @@ func (cleanupJob *CleanupJob) RunScheduled(ctx shutdown.Context) {
 }
 
 func (cleanupJob *CleanupJob) RunCleanup(ctx context.Context) error {
-	return persistence.WithinTransaction(ctx, cleanupJob.transactioner, func(transactionalRepository persistence.Repository) error {
-		staleMailingEntryRemover := staleremover.New(transactionalRepository)
+	return db.InTransaction(ctx, cleanupJob.transactioner, func(repository db.Repository) error {
+		staleMailingEntryRemover := staleremover.New(repository)
 		return staleMailingEntryRemover.Remove(ctx)
 	})
 }

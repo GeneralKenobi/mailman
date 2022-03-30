@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/GeneralKenobi/mailman/internal/persistence"
+	"github.com/GeneralKenobi/mailman/internal/db"
 )
 
 // SqlExecutor is an interface for common query execution functions from sql.DB and sql.Tx.
@@ -20,4 +20,4 @@ type Repository struct {
 	sql SqlExecutor
 }
 
-var _ persistence.Repository = (*Repository)(nil) // Interface guard
+var _ db.Repository = (*Repository)(nil) // Interface guard

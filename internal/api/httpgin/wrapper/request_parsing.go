@@ -12,15 +12,15 @@ import (
 // WithBoundRequestBody binds JSON request body to an instance of T and validates it. If both operations were successful calls the
 // given function.
 func WithBoundRequestBody[T any](request *gin.Context, todo func(requestBody T) error) error {
-	_, err := WithBoundRequestBodyReturningV(request, func(requestBody T) (any, error) {
+	_, err := WithBoundRequestBodyRetV(request, func(requestBody T) (any, error) {
 		return nil, todo(requestBody)
 	})
 	return err
 }
 
-// WithBoundRequestBodyReturningV binds JSON request body to an instance of T and validates it. If both operations were successful calls the
+// WithBoundRequestBodyRetV binds JSON request body to an instance of T and validates it. If both operations were successful calls the
 // given function.
-func WithBoundRequestBodyReturningV[T, V any](request *gin.Context, todo func(requestBody T) (V, error)) (V, error) {
+func WithBoundRequestBodyRetV[T, V any](request *gin.Context, todo func(requestBody T) (V, error)) (V, error) {
 	var requestBody T
 	err := request.ShouldBindJSON(&requestBody)
 	if err != nil {
@@ -60,17 +60,17 @@ var validate = validator.New()
 // given function with the converted value.
 // For example, paramName for path "/api/customer/:id" is "id".
 func WithRequiredIntPathParam(request *gin.Context, paramName string, todo func(param int) error) error {
-	_, err := WithRequiredIntPathParamReturningV(request, paramName, func(param int) (any, error) {
+	_, err := WithRequiredIntPathParamRetV(request, paramName, func(param int) (any, error) {
 		return nil, todo(param)
 	})
 	return err
 }
 
-// WithRequiredIntPathParamReturningV finds parameter paramName in the path and tries to convert it to an integer. If it succeeds then it
+// WithRequiredIntPathParamRetV finds parameter paramName in the path and tries to convert it to an integer. If it succeeds then it
 // calls the given function with the converted value.
 // For example, paramName for path "/api/customer/:id" is "id".
-func WithRequiredIntPathParamReturningV[V any](request *gin.Context, paramName string, todo func(param int) (V, error)) (V, error) {
-	return WithRequiredPathParamReturningV[V](request, paramName, func(param string) (V, error) {
+func WithRequiredIntPathParamRetV[V any](request *gin.Context, paramName string, todo func(param int) (V, error)) (V, error) {
+	return WithRequiredPathParamRetV[V](request, paramName, func(param string) (V, error) {
 		paramAsInt, err := strconv.Atoi(param)
 		if err != nil {
 			return util.ZeroValue[V](), api.StatusBadInput.WithMessage("path parameter %s has to be an integer", paramName)
@@ -82,15 +82,15 @@ func WithRequiredIntPathParamReturningV[V any](request *gin.Context, paramName s
 // WithRequiredPathParam finds parameter paramName in the path and calls the given function with it if it's not an empty string.
 // For example, paramName for path "/api/customer/:email" is "email".
 func WithRequiredPathParam(request *gin.Context, paramName string, todo func(param string) error) error {
-	_, err := WithRequiredPathParamReturningV(request, paramName, func(param string) (any, error) {
+	_, err := WithRequiredPathParamRetV(request, paramName, func(param string) (any, error) {
 		return nil, todo(param)
 	})
 	return err
 }
 
-// WithRequiredPathParamReturningV finds parameter paramName in the path and calls the given function with it if it's not an empty string.
+// WithRequiredPathParamRetV finds parameter paramName in the path and calls the given function with it if it's not an empty string.
 // For example, paramName for path "/api/customer/:email" is "email".
-func WithRequiredPathParamReturningV[V any](request *gin.Context, paramName string, todo func(param string) (V, error)) (V, error) {
+func WithRequiredPathParamRetV[V any](request *gin.Context, paramName string, todo func(param string) (V, error)) (V, error) {
 	param := request.Param(paramName)
 	if param == "" {
 		return util.ZeroValue[V](), api.StatusBadInput.WithMessage("path parameter %s is required", paramName)

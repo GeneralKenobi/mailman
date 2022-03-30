@@ -1,4 +1,4 @@
-package persistence
+package db
 
 import (
 	"context"
@@ -7,25 +7,24 @@ import (
 	"github.com/GeneralKenobi/mailman/pkg/util"
 )
 
-// WithinTransaction opens a transaction and runs the given function with transaction-scoped repository.
+// InTransaction opens a transaction and runs the given function with transaction-scoped repository.
 // If the function returns no errors then transaction is committed.
 // If the function returns an error the transaction is rolled back and the error is returned.
 // If the function panics the transaction is rolled back and this function re-panics with the original value.
 // Error is also returned if it wasn't possible to open or commit a transaction.
-func WithinTransaction(ctx context.Context, transactioner Transactioner, todo func(transactionalRepository Repository) error) error {
-	_, err := WithinTransactionReturningV(ctx, transactioner, func(transactionalRepository Repository) (any, error) {
+func InTransaction(ctx context.Context, transactioner Transactioner, todo func(transactionalRepository Repository) error) error {
+	_, err := InTransactionRetV(ctx, transactioner, func(transactionalRepository Repository) (any, error) {
 		return nil, todo(transactionalRepository)
 	})
 	return err
 }
 
-// WithinTransactionReturningV opens a transaction and runs the given function with transaction-scoped repository.
+// InTransactionRetV opens a transaction and runs the given function with transaction-scoped repository.
 // If the function returns no errors then transaction is committed and the function's result is returned.
 // If the function returns an error the transaction is rolled back and the error is returned.
 // If the function panics the transaction is rolled back and this function re-panics with the original value.
 // Error is also returned if it wasn't possible to open or commit a transaction.
-func WithinTransactionReturningV[V any](
-	ctx context.Context, transactioner Transactioner, todo func(transactionalRepository Repository) (V, error)) (V, error) {
+func InTransactionRetV[V any](ctx context.Context, transactioner Transactioner, todo func(transactionalRepository Repository) (V, error)) (V, error) {
 
 	mdctx.Debugf(ctx, "Opening transaction")
 	transactionalRepository, transaction, err := transactioner.TransactionalRepository(ctx)

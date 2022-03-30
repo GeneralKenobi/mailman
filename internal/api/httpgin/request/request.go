@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/GeneralKenobi/mailman/internal/api"
-	"github.com/GeneralKenobi/mailman/pkg/api/model"
+	"github.com/GeneralKenobi/mailman/pkg/api/apimodel"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -41,7 +41,7 @@ func WriteErrorResponse(ctx context.Context, request *gin.Context, err error) {
 
 	mdctx.Errorf(ctx, "Error processing request: %v", apiError)
 
-	errorDto := model.ErrorDto{
+	errorDto := apimodel.Error{
 		Status:      apiStatusToHttpStatus(apiError.Status()),
 		Message:     apiError.Message(),
 		OperationId: mdctx.OperationId(ctx),
