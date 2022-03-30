@@ -32,9 +32,9 @@ func TestLogging(t *testing.T) {
 
 	// Line numbers have to match the actual line numbers for the function calls above
 	const expected = `
-2022-03-13T20:59:48.162Z INFO         mdctx_test.go:29  ]   Message with format: value, 123   ][correlation-id=abc123][uri=/health]
-2022-03-13T20:59:48.162Z WARN         mdctx_test.go:30  ]   Warn message   ][correlation-id=abc123][uri=/health]
-2022-03-13T20:59:48.162Z ERROR        mdctx_test.go:31  ]   Error message without context   ]
+2022-03-13T20:59:48.162Z INFO                mdctx_test.go:29  ]   Message with format: value, 123   ][correlation-id=abc123][uri=/health]
+2022-03-13T20:59:48.162Z WARN                mdctx_test.go:30  ]   Warn message   ][correlation-id=abc123][uri=/health]
+2022-03-13T20:59:48.162Z ERROR               mdctx_test.go:31  ]   Error message without context   ]
 `
 	expectedTrimmed := strings.TrimSpace(expected)
 
