@@ -3,9 +3,9 @@ package mailingentry
 import (
 	"context"
 	"github.com/GeneralKenobi/mailman/internal/config"
-	"github.com/GeneralKenobi/mailman/internal/job"
 	"github.com/GeneralKenobi/mailman/internal/persistence"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/staleremover"
+	"github.com/GeneralKenobi/mailman/pkg/scheduler"
 	"github.com/GeneralKenobi/mailman/pkg/shutdown"
 	"time"
 )
@@ -20,8 +20,8 @@ type CleanupJob struct {
 
 // RunScheduled runs stale entry cleanup periodically until the context is canceled.
 func (cleanupJob *CleanupJob) RunScheduled(ctx shutdown.Context) {
-	scheduler := job.NewScheduler("stale mailing entry cleanup", cleanupJob.RunCleanup)
-	scheduler.RunPeriodically(ctx, schedulingPeriod())
+	jobScheduler := scheduler.New("stale mailing entry cleanup", cleanupJob.RunCleanup)
+	jobScheduler.RunPeriodically(ctx, schedulingPeriod())
 }
 
 func (cleanupJob *CleanupJob) RunCleanup(ctx context.Context) error {

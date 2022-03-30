@@ -1,4 +1,4 @@
-package job
+package scheduler
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-// NewScheduler creates a scheduler for a function.
+// New creates a scheduler for a function.
 // operationName is used for logging and enhancing MDC in contexts passed to the scheduled function.
 //
 // Scheduler recovers from scheduled function panics and logs errors from its execution.
-func NewScheduler(operationName string, todo func(ctx context.Context) error) *Scheduler {
+func New(operationName string, todo func(ctx context.Context) error) *Scheduler {
 	return &Scheduler{
 		operationName: operationName,
 		todo:          todo,
