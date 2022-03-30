@@ -10,7 +10,7 @@ import (
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/remover"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/sender"
 	"github.com/GeneralKenobi/mailman/internal/service/mailingentry/staleremover"
-	"github.com/GeneralKenobi/mailman/pkg/api/model"
+	"github.com/GeneralKenobi/mailman/pkg/api/apimodel"
 	"github.com/GeneralKenobi/mailman/pkg/mdctx"
 	"github.com/gin-gonic/gin"
 )
@@ -28,14 +28,20 @@ type Handler struct {
 }
 
 func (handler *Handler) CreateHandlerFunc(request *gin.Context) {
-	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
+	wrapper.ForRequestReturningV[apimodel.MailingEntryCreated](request).Handle(func(ctx context.Context) (apimodel.MailingEntryCreated, error) {
 		ctx = mdctx.WithOperationName(ctx, "create mailing entry")
-		return wrapper.WithBoundRequestBody(request, func(mailingEntry model.MailingEntryDto) error {
-			return persistence.WithinTransaction(ctx, handler.transactioner, func(transactionalRepository persistence.Repository) error {
-				customerCreator := customercreator.New(transactionalRepository)
-				mailingEntryCreator := mailingentrycreator.New(transactionalRepository, customerCreator)
-				_, err := mailingEntryCreator.CreateFromDto(ctx, mailingEntry)
-				return err
+		return wrapper.WithBoundRequestBodyReturningV(request, func(mailingEntryDto apimodel.MailingEntry) (apimodel.MailingEntryCreated, error) {
+			return persistence.WithinTransactionReturningV(ctx, handler.transactioner, func(repository persistence.Repository) (apimodel.MailingEntryCreated, error) {
+				customerCreator := customercreator.New(repository)
+				mailingEntryCreator := mailingentrycreator.New(repository, customerCreator)
+
+				mailingEntry, err := mailingEntryCreator.CreateFromDto(ctx, mailingEntryDto)
+				if err != nil {
+					return apimodel.MailingEntryCreated{}, err
+				}
+
+				mailingEntryCreatedDto := apimodel.MailingEntryCreated{Id: mailingEntry.Id}
+				return mailingEntryCreatedDto, nil
 			})
 		})
 	})
@@ -57,7 +63,7 @@ func (handler *Handler) SendMailingIdHandlerFunc(request *gin.Context) {
 	wrapper.ForRequest(request).Handle(func(ctx context.Context) error {
 		ctx = mdctx.WithOperationName(ctx, "send mailing entries with mailing ID")
 
-		return wrapper.WithBoundRequestBody(request, func(mailingRequest model.MailingRequestDto) error {
+		return wrapper.WithBoundRequestBody(request, func(mailingRequest apimodel.MailingRequest) error {
 			mdctx.Debugf(ctx, "Sending mailing entries with mailing ID %d", mailingRequest.MailingId)
 
 			// Use a separate transaction for stale entry cleanup because it can be committed even if sending fails later on.
