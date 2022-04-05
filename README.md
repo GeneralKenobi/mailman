@@ -72,6 +72,19 @@ make postgres-reset
 make postgres-clean
 ```
 
+## Functional requirements
+
+- Operation for creating mailing entries that contain 
+  - Recipient email address
+  - Message title
+  - Message content
+  - Mailing ID (for sending emails later)
+  - Creation timestamp
+- Operation for sending all mailing entries with a given mailing ID
+- Operation for deleting mailing entries by ID
+- Application should automatically delete mailing entries older than 5 minutes
+- Sending email messages is mocked
+
 ## Sample requests
 
 #### Create a mailing entry
@@ -87,7 +100,7 @@ curl localhost:8080/api/messages -X POST -d '{"email":"jan.kowalski@example.com"
 curl localhost:8080/api/messages/23 -X DELETE
 ```
 
-#### Send mailing entries with a mailing ID
+#### Send mailing entries with mailing ID
 
 ```shell
 curl localhost:8080/api/messages/send -X POST -d '{"mailing_id": 2}'
